@@ -2,57 +2,100 @@
 
 React + TypeScript app that fetches products from [DummyJSON](https://dummyjson.com/products), displays them in a searchable, sortable table with pagination, and supports adding new products (mock, client-side only).
 
-## Run
+---
 
-```bash
-npm install
-npm run dev
-```
+## Setup instructions
 
-Build: `npm run build`
+**Prerequisites:** Node.js 18+ (or use the project’s preferred version if you use nvm/Volta).
 
-## Code structure
+1. **Clone and enter the repo**
+   ```bash
+   git clone <repo-url>
+   cd my-app
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Run the dev server**
+   ```bash
+   npm run dev
+   ```
+   Open the URL shown (e.g. `http://localhost:5173`).
+
+4. **Optional**
+   - Build: `npm run build`
+   - Preview production build: `npm run preview`
+   - Lint: `npm run lint`
+
+---
+
+## Folder structure explanation
 
 ```
 src/
 ├── api/
-│   └── products.ts           # fetchProducts(limit?, signal?)
+│   └── products.ts              # DummyJSON fetch; AbortSignal support
 ├── hooks/
-│   ├── useProducts.ts         # Products state, loading, error, refetch, addProduct
-│   └── useProductTableState.ts # Search, sort, pagination for table (filter → sort → page)
+│   ├── useProducts.ts            # Products list state, loading, error, refetch, addProduct (mock)
+│   ├── useProductTableState.ts   # Search, sort, pagination (filter → sort → page)
+│   └── useDebouncedCallback.ts   # Debounced callback for search input
 ├── types/
-│   └── product.ts             # Product, ProductCreate, ProductsResponse
+│   └── product.ts               # Product, ProductCreate, ProductsResponse
 ├── components/
-│   ├── ProductTable.tsx       # Table + search + sortable headers + pagination; loading/error/empty
+│   ├── ProductTable.tsx         # Table + search + sortable headers + pagination; loading/error/empty
 │   ├── ProductTable.module.scss
-│   ├── Pagination.tsx        # Page controls
+│   ├── Pagination.tsx           # Page controls
 │   ├── Pagination.module.scss
-│   ├── AddProductForm.tsx    # Add product form (mock submit)
+│   ├── AddProductForm.tsx       # Add product form (mock submit)
 │   ├── AddProductForm.module.scss
-│   ├── FormFields.tsx        # Reusable form field renderer (used by AddProductForm)
+│   ├── FormFields.tsx           # Reusable form field renderer
 │   └── FormFields.module.scss
-├── constants/               # PAGE_SIZE, DEFAULT_FETCH_LIMIT, SEARCH_DEBOUNCE_MS, SUCCESS_MESSAGE_MS
-│   └── index.ts
+├── constants/
+│   └── index.ts                 # PAGE_SIZE, DEFAULT_FETCH_LIMIT, SEARCH_DEBOUNCE_MS, etc.
 ├── App.tsx
 ├── App.module.scss
 ├── main.tsx
-└── index.css
+└── index.css                    # Global styles, CSS variables
 ```
 
-- **Path alias**: Imports use `@/` for `src/` (e.g. `@/components/ProductTable`, `@/hooks/useProductTableState`). Configured in `tsconfig.app.json` and `vite.config.ts`.
-- **Single responsibility**: API only fetches; `useProducts` owns products state and async; `useProductTableState` owns search/sort/page state; components render and callbacks.
-- **Constants** for pagination and fetch limit in one place.
-- **BEM + SCSS** for styles; px units; mobile breakpoint at 414px (iPhone SE).
+- **api/** — Network layer only; no React. Single `fetchProducts(limit?, signal?)` function.
+- **hooks/** — `useProducts` = server state (fetch, refetch, add mock). `useProductTableState` = UI state (search, sort, page). `useDebouncedCallback` = generic debounce for search.
+- **types/** — Shared TypeScript types for API and forms.
+- **components/** — Presentational + wiring; each feature has its component + `.module.scss` (BEM, px, 414px breakpoint).
+- **constants/** — Pagination size, fetch limit, debounce delay, success toast duration; single place to tune behaviour.
+- Imports use the **`@/`** path alias for `src/` (see `tsconfig.app.json` and `vite.config.ts`).
 
-## State management and async
+---
 
-- **useProducts**: Single source of truth for product list — `products`, `loading`, `error`, `refetch`, `addProduct`. Fetch on mount with `useEffect`; **AbortController** cancels in-flight request on unmount or when `refetch` runs; **AbortError** is ignored so we don’t set error state after unmount.
-- **useProductTableState**: Table UI state — `searchQuery`, `handleSearchChange`, sort (`activeSortColumn`, `activeSortDirection`, `handleSortByColumn`), pagination (`clampedPageIndex`, `totalPageCount`, `setCurrentPageIndex`). Pipeline: filter by search → sort by column → slice for current page. Changing search resets sort and page; changing sort column resets page.
-- **useDebouncedCallback**: Wraps a callback so it runs only after a delay (e.g. `SEARCH_DEBOUNCE_MS`) with no further calls. Used on the search input so filtering runs after the user stops typing; input stays responsive via local state.
-- **Add product**: Mock-only; updates local state with new id/sku and prepends to the list; no API call.
+## Key technical decisions
 
-## Table behaviour
+| Area | Decision | Rationale |
+|------|----------|-----------|
+| **Data fetching** | `useEffect` + `AbortController` in `useProducts` | Cancel in-flight request on unmount or refetch; ignore `AbortError` so unmount doesn’t set error state. |
+| **Add product** | Mock-only, prepend to local state with generated id/sku | No backend; keeps demo self-contained and fast. |
+| **Table state** | Dedicated hook `useProductTableState`: filter → sort → slice | Search/sort/page live in one place; search reset clears sort and page; sort column change resets page. |
+| **Search UX** | `useDebouncedCallback` on search input | Filter runs after user stops typing; input stays responsive via local state. |
+| **Styling** | BEM + SCSS modules, px, 414px mobile breakpoint | Scoped styles, predictable class names, simple responsive behaviour. |
+| **Path alias** | `@/` → `src/` | Shorter, stable imports when moving files. |
+| **Constants** | Single `constants/index.ts` | One place for PAGE_SIZE, DEFAULT_FETCH_LIMIT, SEARCH_DEBOUNCE_MS, SUCCESS_MESSAGE_MS. |
 
-- **Search**: Filters by title, description, category, brand. Sort applies to the filtered list.
-- **Sort**: Click a column header (Title, Category, Brand, Price, Rating, Stock) — first click ascending (▲), second click descending (▼), then toggles. Image column not sortable. Table uses a `ProductTableHead` subcomponent for the sortable thead.
-- **Pagination**: Page size from constants; page index clamped when filtered list shrinks so we don’t show a blank page.
+**Table behaviour:** Search filters by title, description, category, brand. Sort applies to the filtered list. Column headers (Title, Category, Brand, Price, Rating, Stock) toggle asc/desc; Image not sortable. Pagination clamps page index when the filtered list shrinks so we never show a blank page.
+
+---
+
+## What would be improved with more time
+
+- **Full CRUD** — Implement Update (edit product) and Delete (remove product) with real API endpoints and UI (e.g. edit row/modal, delete confirmation); Read is already covered by fetch, Create by add-product.
+- **Virtualisation** — For very large lists, use a virtualised table (e.g. `react-window` / `tanstack-virtual`) to keep DOM and scroll performance good.
+- **Form validation** — Explicit schema (e.g. Zod) and clearer error messages on add-product form; optional client-side validation before submit.
+
+---
+
+## Quick reference
+
+- **Run:** `npm run dev`
+- **Build:** `npm run build`
+- **Lint:** `npm run lint`
