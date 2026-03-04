@@ -1,0 +1,109 @@
+.add-product-form {
+  margin-bottom: 32px;
+  padding: 20px;
+  border: 1px solid #444;
+  border-radius: 8px;
+
+  &__title {
+    margin: 0 0 16px;
+    font-size: 20px;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__field,
+  &__category,
+  &__price,
+  &__rating,
+  &__stock,
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__category,
+  &__price,
+  &__rating,
+  &__stock,
+  &__brand {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  &__label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+    color: #aaa;
+  }
+
+  &__input {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: var(--bg-input, #2a2a2a);
+    color: inherit;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__success {
+    color: #6a6;
+    font-size: 14px;
+  }
+}
+
+/* iPhone SE and small mobile */
+@media (max-width: 414px) {
+  .add-product-form {
+    padding: 12px 16px;
+    margin-bottom: 24px;
+
+    &__title {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    &__form {
+      gap: 12px;
+    }
+
+    &__input {
+      min-height: 44px;
+      font-size: 16px; /* prevent iOS zoom on focus */
+      padding: 10px 12px;
+    }
+
+    &__actions button {
+      min-height: 44px;
+      width: 100%;
+    }
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .add-product-form {
+    border-color: #ddd;
+    background: #f9f9f9;
+
+    &__label {
+      color: #555;
+    }
+
+    &__input {
+      border-color: #ccc;
+      --bg-input: #fff;
+    }
+  }
+}

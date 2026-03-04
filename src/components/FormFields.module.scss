@@ -1,0 +1,139 @@
+.form-fields {
+  &__row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    column-gap: 16px;
+    row-gap: 16px;
+  }
+
+  &__label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+    color: #aaa;
+  }
+
+  &__input {
+    padding: 8px 12px;
+    font-size: 16px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: var(--bg-input, #2a2a2a);
+    color: inherit;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  &__file {
+    font-size: 14px;
+    color: inherit;
+  }
+
+  &__previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__preview {
+    position: relative;
+    width: 64px;
+    height: 64px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #444;
+    }
+  }
+
+  &__preview-remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+    border-radius: 50%;
+    border: 1px solid #444;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+
+    &:hover {
+      background: #e66;
+      border-color: #e66;
+    }
+  }
+}
+
+/* Tablet / small desktop: row stays horizontal */
+@media (max-width: 640px) {
+  .form-fields__row {
+    flex-direction: column;
+  }
+}
+
+/* iPhone SE and small mobile */
+@media (max-width: 414px) {
+  .form-fields {
+    &__row {
+      flex-direction: column;
+      row-gap: 12px;
+    }
+
+    &__input {
+      min-height: 44px;
+      font-size: 16px; /* prevent iOS zoom on focus */
+      padding: 10px 12px;
+    }
+
+    &__preview {
+      width: 56px;
+      height: 56px;
+    }
+
+    &__preview-remove {
+      width: 24px;
+      height: 24px;
+      font-size: 20px;
+      top: -4px;
+      right: -4px;
+    }
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .form-fields {
+    &__label {
+      color: #555;
+    }
+
+    &__input {
+      border-color: #ccc;
+      --bg-input: #fff;
+    }
+
+    &__preview img {
+      border-color: #ccc;
+    }
+
+    &__preview-remove {
+      background: #fff;
+      color: #333;
+      border-color: #999;
+
+      &:hover {
+        background: #e66;
+        color: #fff;
+        border-color: #e66;
+      }
+    }
+  }
+}
